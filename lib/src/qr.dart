@@ -27,18 +27,25 @@ enum ErrorCorrectionLevel { L, M, Q, H }
 
 List<List<bool>> qr(
   String input, {
-  int version = -1,
+  // [1-40], set it to null for autosize https://www.qrcode.com/en/about/version.html
+  int? version,
+  // Level L can be dirty/damaged for up to 7%, level M 15%, level Q 25%, level H 30%.
   ErrorCorrectionLevel errorCorrectionLevel = ErrorCorrectionLevel.M,
 }) {
+  // This is a Utf8 only implementation
   final data = const Utf8Encoder().convert(input);
 
-  if (version < 1) {
-    for (version = 1; version < 40; version += 1) {
-      final rsBlocks = _QRRSBlock.getRsBlocks(version, errorCorrectionLevel);
+  int versionValue;
+  if (version != null) {
+    versionValue = version;
+  } else {
+    for (versionValue = 1; versionValue < 40; versionValue += 1) {
+      final rsBlocks =
+          _QRRSBlock.getRsBlocks(versionValue, errorCorrectionLevel);
       final buffer = _QrBitBuffer();
 
       buffer.put(4, 4);
-      buffer.put(data.length, _QRUtil.getLengthInBits(version));
+      buffer.put(data.length, _QRUtil.getLengthInBits(versionValue));
       buffer.putBytes(data);
 
       var totalDataCount = 0;
@@ -50,6 +57,15 @@ List<List<bool>> qr(
     }
   }
 
+  // Now we have version also, let's call the concrete implementation
+  return _qr(data, versionValue, errorCorrectionLevel);
+}
+
+List<List<bool>> _qr(
+  Uint8List data,
+  int version,
+  ErrorCorrectionLevel errorCorrectionLevel,
+) {
   final size = version * 4 + 17;
   final modules =
       List<List<bool?>>.generate(size, (_) => List.generate(size, (_) => null));
