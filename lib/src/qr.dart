@@ -49,11 +49,11 @@ List<List<bool>> qr(
       buffer.putBytes(data);
 
       var totalDataCount = 0;
-      for (var i = 0; i < rsBlocks.length; i += 1) {
-        totalDataCount += rsBlocks[i].dataCount;
+      for (var block in rsBlocks) {
+        totalDataCount += block.dataCount;
       }
 
-      if (buffer.getLengthInBits() <= totalDataCount * 8) break;
+      if (buffer.lengthInBits <= totalDataCount * 8) break;
     }
   }
 
@@ -75,7 +75,7 @@ List<List<bool>> _qr(
 
   final cache = _createData(version, errorCorrectionLevel, data);
 
-  List<List<bool?>> make(bool test, _MaskPattern maskPattern) {
+  void make(bool test, _MaskPattern maskPattern) {
     for (var row = 0; row < size; row += 1) {
       for (var col = 0; col < size; col += 1) {
         modules[row][col] = null;
@@ -92,12 +92,10 @@ List<List<bool>> _qr(
     if (version >= 7) _setupVersionNumber(modules, version, test);
 
     _mapData(modules, cache, maskPattern);
-
-    return modules;
   }
 
   for (var i = 0; i < 8; i += 1) {
-    final modules = make(true, _MaskPattern.values[i]);
+    make(true, _MaskPattern.values[i]);
 
     final lostPoint = _getLostPoint(modules);
 
@@ -107,9 +105,8 @@ List<List<bool>> _qr(
     }
   }
 
-  return make(false, bestPattern)
-      .map((e) => e.map((e) => e!).toList())
-      .toList();
+  make(false, bestPattern);
+  return modules.map((e) => e.map((e) => e!).toList()).toList();
 }
 
 const _pad0 = 0xec;
@@ -168,11 +165,8 @@ void _setupPositionProbePattern(
 void _setupPositionAdjustPattern(List<List<bool?>> modules, int version) {
   final pos = _QRUtil.getPatternPosition(version);
 
-  for (var i = 0; i < pos.length; i += 1) {
-    for (var j = 0; j < pos.length; j += 1) {
-      final row = pos[i];
-      final col = pos[j];
-
+  for (var row in pos) {
+    for (var col in pos) {
       if (modules[row][col] != null) continue;
 
       for (var r = -2; r <= 2; r += 1) {
@@ -289,9 +283,7 @@ void _mapData(
 
           final mask = maskFunc(row, col - c);
 
-          if (mask) {
-            dark = !dark;
-          }
+          if (mask) dark = !dark;
 
           modules[row][col - c] = dark;
           bitIndex -= 1;
@@ -333,9 +325,7 @@ double _getLostPoint(List<List<bool?>> modules) {
           if (col + c < 0 || size <= col + c) continue;
           if (r == 0 && c == 0) continue;
 
-          if (dark == isDark(row + r, col + c)) {
-            sameCount += 1;
-          }
+          if (dark == isDark(row + r, col + c)) sameCount += 1;
         }
       }
 
@@ -351,9 +341,7 @@ double _getLostPoint(List<List<bool?>> modules) {
       if (isDark(row + 1, col)) count += 1;
       if (isDark(row, col + 1)) count += 1;
       if (isDark(row + 1, col + 1)) count += 1;
-      if (count == 0 || count == 4) {
-        lostPoint += 3;
-      }
+      if (count == 0 || count == 4) lostPoint += 3;
     }
   }
 
@@ -427,19 +415,19 @@ List<int> _createBytes(_QrBitBuffer buffer, List<_Rs> rsBlocks) {
     offset += dcCount;
 
     final rsPoly = _QRUtil.getErrorCorrectPolynomial(ecCount);
-    final rawPoly = _QrPolynomial(dcData[r], rsPoly.getLength() - 1);
+    final rawPoly = _QrPolynomial(dcData[r], rsPoly.length - 1);
 
     final modPoly = rawPoly.mod(rsPoly);
-    ecData[r] = List.generate(rsPoly.getLength() - 1, (_) => 0);
+    ecData[r] = List.generate(rsPoly.length - 1, (_) => 0);
     for (var i = 0; i < ecData[r].length; i += 1) {
-      final modIndex = i + modPoly.getLength() - ecData[r].length;
+      final modIndex = i + modPoly.length - ecData[r].length;
       ecData[r][i] = modIndex >= 0 ? modPoly.getAt(modIndex) : 0;
     }
   }
 
   var totalCodeCount = 0;
-  for (var i = 0; i < rsBlocks.length; i += 1) {
-    totalCodeCount += rsBlocks[i].totalCount;
+  for (var block in rsBlocks) {
+    totalCodeCount += block.totalCount;
   }
 
   final data = List.generate(totalCodeCount, (index) => 0);
@@ -481,30 +469,30 @@ List<int> _createData(
 
   // calc num max data.
   var totalDataCount = 0;
-  for (var i = 0; i < rsBlocks.length; i += 1) {
-    totalDataCount += rsBlocks[i].dataCount;
+  for (final block in rsBlocks) {
+    totalDataCount += block.dataCount;
   }
 
-  if (buffer.getLengthInBits() > totalDataCount * 8) {
+  if (buffer.lengthInBits > totalDataCount * 8) {
     throw RangeError(
-      'code length overflow. (${buffer.getLengthInBits()}>${totalDataCount * 8})',
+      'code length overflow. (${buffer.lengthInBits}>${totalDataCount * 8})',
     );
   }
 
   // end code
-  if (buffer.getLengthInBits() + 4 <= totalDataCount * 8) buffer.put(0, 4);
+  if (buffer.lengthInBits + 4 <= totalDataCount * 8) buffer.put(0, 4);
 
   // padding
-  while (buffer.getLengthInBits() % 8 != 0) {
+  while (buffer.lengthInBits % 8 != 0) {
     buffer.putBit(false);
   }
 
   // padding
   while (true) {
-    if (buffer.getLengthInBits() >= totalDataCount * 8) break;
+    if (buffer.lengthInBits >= totalDataCount * 8) break;
     buffer.put(_pad0, 8);
 
-    if (buffer.getLengthInBits() >= totalDataCount * 8) break;
+    if (buffer.lengthInBits >= totalDataCount * 8) break;
     buffer.put(_pad1, 8);
   }
 
@@ -598,9 +586,8 @@ class _QRUtil {
     return (data << 12) | d;
   }
 
-  static List<int> getPatternPosition(int version) {
-    return _patternPositionTable[version - 1];
-  }
+  static List<int> getPatternPosition(int version) =>
+      _patternPositionTable[version - 1];
 
   static _QrPolynomial getErrorCorrectPolynomial(int errorCorrectLength) {
     var a = _QrPolynomial([1], 0);
@@ -682,13 +669,13 @@ class _QrPolynomial {
 
   int getAt(int index) => _num[index];
 
-  int getLength() => _num.length;
+  int get length => _num.length;
 
   _QrPolynomial multiply(_QrPolynomial e) {
-    final num = List.generate(getLength() + e.getLength() - 1, (_) => 0);
+    final num = List.generate(length + e.length - 1, (_) => 0);
 
-    for (var i = 0; i < getLength(); i += 1) {
-      for (var j = 0; j < e.getLength(); j += 1) {
+    for (var i = 0; i < length; i += 1) {
+      for (var j = 0; j < e.length; j += 1) {
         num[i + j] ^=
             qrMath.gExp(qrMath.gLog(getAt(i)) + qrMath.gLog(e.getAt(j)));
       }
@@ -698,16 +685,16 @@ class _QrPolynomial {
   }
 
   _QrPolynomial mod(_QrPolynomial e) {
-    if (getLength() - e.getLength() < 0) return this;
+    if (length - e.length < 0) return this;
 
     final ratio = qrMath.gLog(getAt(0)) - qrMath.gLog(e.getAt(0));
 
-    final num = List.generate(getLength(), (_) => 0);
-    for (var i = 0; i < getLength(); i += 1) {
+    final num = List.generate(length, (_) => 0);
+    for (var i = 0; i < length; i += 1) {
       num[i] = getAt(i);
     }
 
-    for (var i = 0; i < e.getLength(); i += 1) {
+    for (var i = 0; i < e.length; i += 1) {
       num[i] ^= qrMath.gExp(qrMath.gLog(e.getAt(i)) + ratio);
     }
 
@@ -967,18 +954,8 @@ class _QRRSBlock {
   static List<int> _getRsBlockTable(
     int version,
     ErrorCorrectionLevel errorCorrectionLevel,
-  ) {
-    switch (errorCorrectionLevel) {
-      case ErrorCorrectionLevel.L:
-        return _rsBlockTable[(version - 1) * 4 + 0];
-      case ErrorCorrectionLevel.M:
-        return _rsBlockTable[(version - 1) * 4 + 1];
-      case ErrorCorrectionLevel.Q:
-        return _rsBlockTable[(version - 1) * 4 + 2];
-      case ErrorCorrectionLevel.H:
-        return _rsBlockTable[(version - 1) * 4 + 3];
-    }
-  }
+  ) =>
+      _rsBlockTable[(version - 1) * 4 + errorCorrectionLevel.index];
 
   static List<_Rs> getRsBlocks(
     int version,
@@ -1016,18 +993,12 @@ class _QrBitBuffer {
     }
   }
 
-  int getLengthInBits() => _length;
+  int get lengthInBits => _length;
 
   void putBit(bool bit) {
     final bufIndex = (_length / 8).floor();
-    if (_buffer.length <= bufIndex) {
-      _buffer.add(0);
-    }
-
-    if (bit) {
-      _buffer[bufIndex] |= 0x80 >>> _length % 8;
-    }
-
+    if (_buffer.length <= bufIndex) _buffer.add(0);
+    if (bit) _buffer[bufIndex] |= 0x80 >>> _length % 8;
     _length += 1;
   }
 
