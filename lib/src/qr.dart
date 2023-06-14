@@ -665,6 +665,8 @@ class _QrPolynomial {
     for (var i = 0; i < num.length - offset; i += 1) {
       _num[i] = num[i + offset];
     }
+
+    _num = List.unmodifiable(_num);
   }
 
   int getAt(int index) => _num[index];
@@ -689,10 +691,7 @@ class _QrPolynomial {
 
     final ratio = qrMath.gLog(getAt(0)) - qrMath.gLog(e.getAt(0));
 
-    final num = List.generate(length, (_) => 0);
-    for (var i = 0; i < length; i += 1) {
-      num[i] = getAt(i);
-    }
+    final num = _num.toList();
 
     for (var i = 0; i < e.length; i += 1) {
       num[i] ^= qrMath.gExp(qrMath.gLog(e.getAt(i)) + ratio);
