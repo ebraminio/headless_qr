@@ -67,8 +67,9 @@ List<List<bool>> _qr(
   ErrorCorrectionLevel errorCorrectionLevel,
 ) {
   final size = version * 4 + 17;
-  final modules =
-      List<List<bool?>>.generate(size, (_) => List.generate(size, (_) => null));
+  final modules = <List<bool?>>[
+    for (var _ = 0; _ < size; ++_) [for (var _ = 0; _ < size; ++_) null]
+  ];
 
   var minLostPoint = .0;
   var bestPattern = _MaskPattern.pattern000;
@@ -106,7 +107,9 @@ List<List<bool>> _qr(
   }
 
   make(false, bestPattern);
-  return modules.map((e) => e.map((e) => e!).toList()).toList();
+  return [
+    for (final row in modules) [for (final e in row) e!]
+  ];
 }
 
 const _pad0 = 0xec;
@@ -397,8 +400,8 @@ List<int> _createBytes(_QrBitBuffer buffer, List<_Rs> rsBlocks) {
   var maxDcCount = 0;
   var maxEcCount = 0;
 
-  final dcData = List<List<int>>.generate(rsBlocks.length, (_) => []);
-  final ecData = List<List<int>>.generate(rsBlocks.length, (_) => []);
+  final dcData = [for (final _ in rsBlocks) <int>[]];
+  final ecData = [for (final _ in rsBlocks) <int>[]];
 
   for (var r = 0; r < rsBlocks.length; r += 1) {
     final dcCount = rsBlocks[r].dataCount;
@@ -407,7 +410,7 @@ List<int> _createBytes(_QrBitBuffer buffer, List<_Rs> rsBlocks) {
     maxDcCount = max(maxDcCount, dcCount);
     maxEcCount = max(maxEcCount, ecCount);
 
-    dcData[r] = List.generate(dcCount, (_) => 0);
+    dcData[r] = [for (var _ = 0; _ < dcCount; ++_) 0];
 
     for (var i = 0; i < dcData[r].length; i += 1) {
       dcData[r][i] = 0xff & buffer.getBuffer()[i + offset];
@@ -418,7 +421,7 @@ List<int> _createBytes(_QrBitBuffer buffer, List<_Rs> rsBlocks) {
     final rawPoly = _QrPolynomial(dcData[r], rsPoly.length - 1);
 
     final modPoly = rawPoly.mod(rsPoly);
-    ecData[r] = List.generate(rsPoly.length - 1, (_) => 0);
+    ecData[r] = [for (var _ = 0; _ < rsPoly.length - 1; ++_) 0];
     for (var i = 0; i < ecData[r].length; i += 1) {
       final modIndex = i + modPoly.length - ecData[r].length;
       ecData[r][i] = modIndex >= 0 ? modPoly.getAt(modIndex) : 0;
@@ -430,7 +433,7 @@ List<int> _createBytes(_QrBitBuffer buffer, List<_Rs> rsBlocks) {
     totalCodeCount += block.totalCount;
   }
 
-  final data = List.generate(totalCodeCount, (index) => 0);
+  final data = [for (var _ = 0; _ < totalCodeCount; ++_) 0];
   var index = 0;
 
   for (var i = 0; i < maxDcCount; i += 1) {
@@ -614,8 +617,8 @@ class _QRUtil {
 }
 
 class _QRMath {
-  final expTable = List.generate(256, (index) => 0);
-  final logTable = List.generate(256, (index) => 0);
+  final expTable = [for (var _ = 0; _ < 256; ++_) 0];
+  final logTable = [for (var _ = 0; _ < 256; ++_) 0];
 
   _QRMath() {
     // initialize tables
@@ -661,7 +664,7 @@ class _QrPolynomial {
       offset += 1;
     }
 
-    _num = List.generate(num.length - offset + shift, (_) => 0);
+    _num = [for (var _ = 0; _ < num.length - offset + shift; ++_) 0];
     for (var i = 0; i < num.length - offset; i += 1) {
       _num[i] = num[i + offset];
     }
@@ -674,7 +677,7 @@ class _QrPolynomial {
   int get length => _num.length;
 
   _QrPolynomial multiply(_QrPolynomial e) {
-    final num = List.generate(length + e.length - 1, (_) => 0);
+    final num = [for (var _ = 0; _ < length + e.length - 1; ++_) 0];
 
     for (var i = 0; i < length; i += 1) {
       for (var j = 0; j < e.length; j += 1) {
