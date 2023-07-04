@@ -126,24 +126,17 @@ enum _MaskPattern {
   pattern111;
 
   bool Function(int i, int j) getMaskFunction() {
-    switch (this) {
-      case pattern000:
-        return (int i, int j) => (i + j) % 2 == 0;
-      case pattern001:
-        return (int i, int j) => i % 2 == 0;
-      case pattern010:
-        return (int i, int j) => j % 3 == 0;
-      case pattern011:
-        return (int i, int j) => (i + j) % 3 == 0;
-      case pattern100:
-        return (int i, int j) => ((i / 2).floor() + (j / 3).floor()) % 2 == 0;
-      case pattern101:
-        return (int i, int j) => ((i * j) % 2) + ((i * j) % 3) == 0;
-      case pattern110:
-        return (int i, int j) => (((i * j) % 2) + ((i * j) % 3)) % 2 == 0;
-      case pattern111:
-        return (int i, int j) => (((i * j) % 3) + ((i + j) % 2)) % 2 == 0;
-    }
+    return switch (this) {
+      pattern000 => (int i, int j) => (i + j) % 2 == 0,
+      pattern001 => (int i, int j) => i % 2 == 0,
+      pattern010 => (int i, int j) => j % 3 == 0,
+      pattern011 => (int i, int j) => (i + j) % 3 == 0,
+      pattern100 => (int i, int j) =>
+          ((i / 2).floor() + (j / 3).floor()) % 2 == 0,
+      pattern101 => (int i, int j) => ((i * j) % 2) + ((i * j) % 3) == 0,
+      pattern110 => (int i, int j) => (((i * j) % 2) + ((i * j) % 3)) % 2 == 0,
+      pattern111 => (int i, int j) => (((i * j) % 3) + ((i + j) % 2)) % 2 == 0,
+    };
   }
 }
 
@@ -195,16 +188,12 @@ void _setupTimingPattern(List<List<bool?>> modules) {
 }
 
 int _correctionValue(ErrorCorrectionLevel level) {
-  switch (level) {
-    case ErrorCorrectionLevel.L:
-      return 1;
-    case ErrorCorrectionLevel.M:
-      return 0;
-    case ErrorCorrectionLevel.Q:
-      return 3;
-    case ErrorCorrectionLevel.H:
-      return 2;
-  }
+  return switch (level) {
+    ErrorCorrectionLevel.L => 1,
+    ErrorCorrectionLevel.M => 0,
+    ErrorCorrectionLevel.Q => 3,
+    ErrorCorrectionLevel.H => 2,
+  };
 }
 
 void _setupTypeInfo(
