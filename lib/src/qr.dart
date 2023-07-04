@@ -127,15 +127,14 @@ enum _MaskPattern {
 
   bool Function(int i, int j) getMaskFunction() {
     return switch (this) {
-      pattern000 => (int i, int j) => (i + j) % 2 == 0,
-      pattern001 => (int i, int j) => i % 2 == 0,
-      pattern010 => (int i, int j) => j % 3 == 0,
-      pattern011 => (int i, int j) => (i + j) % 3 == 0,
-      pattern100 => (int i, int j) =>
-          ((i / 2).floor() + (j / 3).floor()) % 2 == 0,
-      pattern101 => (int i, int j) => ((i * j) % 2) + ((i * j) % 3) == 0,
-      pattern110 => (int i, int j) => (((i * j) % 2) + ((i * j) % 3)) % 2 == 0,
-      pattern111 => (int i, int j) => (((i * j) % 3) + ((i + j) % 2)) % 2 == 0,
+      pattern000 => (i, j) => (i + j) % 2 == 0,
+      pattern001 => (i, j) => i % 2 == 0,
+      pattern010 => (i, j) => j % 3 == 0,
+      pattern011 => (i, j) => (i + j) % 3 == 0,
+      pattern100 => (i, j) => ((i / 2).floor() + (j / 3).floor()) % 2 == 0,
+      pattern101 => (i, j) => ((i * j) % 2) + ((i * j) % 3) == 0,
+      pattern110 => (i, j) => (((i * j) % 2) + ((i * j) % 3)) % 2 == 0,
+      pattern111 => (i, j) => (((i * j) % 3) + ((i + j) % 2)) % 2 == 0,
     };
   }
 }
