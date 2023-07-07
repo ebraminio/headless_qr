@@ -98,7 +98,9 @@ List<List<bool>> _qr(
   for (var i = 0; i < 8; i += 1) {
     make(true, _MaskPattern.values[i]);
 
-    final lostPoint = _getLostPoint(modules);
+    final lostPoint = _getLostPoint([
+      for (final row in modules) [for (final e in row) e!]
+    ]);
 
     if (i == 0 || minLostPoint > lostPoint) {
       minLostPoint = lostPoint;
@@ -297,16 +299,14 @@ void _mapData(
   }
 }
 
-double _getLostPoint(List<List<bool?>> modules) {
-  final size = modules.length;
+double _getLostPoint(List<List<bool>> matrix) {
+  final size = matrix.length;
   var lostPoint = .0;
-
-  isDark(int row, int col) => modules[row][col]!;
 
   // LEVEL1
   for (var row = 0; row < size; row += 1) {
     for (var col = 0; col < size; col += 1) {
-      final dark = isDark(row, col);
+      final dark = matrix[row][col];
       var sameCount = 0;
 
       for (var r = -1; r <= 1; r += 1) {
@@ -316,7 +316,7 @@ double _getLostPoint(List<List<bool?>> modules) {
           if (col + c < 0 || size <= col + c) continue;
           if (r == 0 && c == 0) continue;
 
-          if (dark == isDark(row + r, col + c)) sameCount += 1;
+          if (dark == matrix[row + r][col + c]) sameCount += 1;
         }
       }
 
@@ -328,10 +328,10 @@ double _getLostPoint(List<List<bool?>> modules) {
   for (var row = 0; row < size - 1; row += 1) {
     for (var col = 0; col < size - 1; col += 1) {
       var count = 0;
-      if (isDark(row, col)) count += 1;
-      if (isDark(row + 1, col)) count += 1;
-      if (isDark(row, col + 1)) count += 1;
-      if (isDark(row + 1, col + 1)) count += 1;
+      if (matrix[row][col]) count += 1;
+      if (matrix[row + 1][col]) count += 1;
+      if (matrix[row][col + 1]) count += 1;
+      if (matrix[row + 1][col + 1]) count += 1;
       if (count == 0 || count == 4) lostPoint += 3;
     }
   }
@@ -339,13 +339,13 @@ double _getLostPoint(List<List<bool?>> modules) {
   // LEVEL3
   for (var row = 0; row < size; row += 1) {
     for (var col = 0; col < size - 6; col += 1) {
-      if (isDark(row, col) &&
-          !isDark(row, col + 1) &&
-          isDark(row, col + 2) &&
-          isDark(row, col + 3) &&
-          isDark(row, col + 4) &&
-          !isDark(row, col + 5) &&
-          isDark(row, col + 6)) {
+      if (matrix[row][col] &&
+          !matrix[row][col + 1] &&
+          matrix[row][col + 2] &&
+          matrix[row][col + 3] &&
+          matrix[row][col + 4] &&
+          !matrix[row][col + 5] &&
+          matrix[row][col + 6]) {
         lostPoint += 40;
       }
     }
@@ -353,13 +353,13 @@ double _getLostPoint(List<List<bool?>> modules) {
 
   for (var col = 0; col < size; col += 1) {
     for (var row = 0; row < size - 6; row += 1) {
-      if (isDark(row, col) &&
-          !isDark(row + 1, col) &&
-          isDark(row + 2, col) &&
-          isDark(row + 3, col) &&
-          isDark(row + 4, col) &&
-          !isDark(row + 5, col) &&
-          isDark(row + 6, col)) {
+      if (matrix[row][col] &&
+          !matrix[row + 1][col] &&
+          matrix[row + 2][col] &&
+          matrix[row + 3][col] &&
+          matrix[row + 4][col] &&
+          !matrix[row + 5][col] &&
+          matrix[row + 6][col]) {
         lostPoint += 40;
       }
     }
@@ -370,7 +370,7 @@ double _getLostPoint(List<List<bool?>> modules) {
 
   for (var col = 0; col < size; col += 1) {
     for (var row = 0; row < size; row += 1) {
-      if (isDark(row, col)) darkCount += 1;
+      if (matrix[row][col]) darkCount += 1;
     }
   }
 
