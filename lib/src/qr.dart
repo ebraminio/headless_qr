@@ -211,26 +211,19 @@ void _setupTypeInfo(
   for (var i = 0; i < 15; i += 1) {
     final mod = !test && ((bits >> i) & 1) == 1;
 
-    if (i < 6) {
-      modules[i][8] = mod;
-    } else if (i < 8) {
-      modules[i + 1][8] = mod;
-    } else {
-      modules[modules.length - 15 + i][8] = mod;
-    }
+    modules[switch (i) { < 6 => i, < 8 => i + 1, _ => modules.length - 15 + i }]
+        [8] = mod;
   }
 
   // horizontal
   for (var i = 0; i < 15; i += 1) {
     final mod = !test && ((bits >> i) & 1) == 1;
 
-    if (i < 8) {
-      modules[8][modules.length - i - 1] = mod;
-    } else if (i < 9) {
-      modules[8][15 - i - 1 + 1] = mod;
-    } else {
-      modules[8][15 - i - 1] = mod;
-    }
+    modules[8][switch (i) {
+      < 8 => modules.length - i - 1,
+      < 9 => 15 - i - 1 + 1,
+      _ => 15 - i - 1
+    }] = mod;
   }
 
   // fixed module
@@ -268,17 +261,9 @@ void _mapData(
     while (true) {
       for (var c = 0; c < 2; c += 1) {
         if (modules[row][col - c] == null) {
-          var dark = false;
-
-          if (byteIndex < data.length) {
-            dark = ((data[byteIndex] >>> bitIndex) & 1) == 1;
-          }
-
-          final mask = maskFunc(row, col - c);
-
-          if (mask) dark = !dark;
-
-          modules[row][col - c] = dark;
+          modules[row][col - c] = maskFunc(row, col - c) ^
+              (byteIndex < data.length &&
+                  ((data[byteIndex] >>> bitIndex) & 1) == 1);
           bitIndex -= 1;
 
           if (bitIndex == -1) {
