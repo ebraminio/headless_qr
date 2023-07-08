@@ -209,21 +209,20 @@ void _setupTypeInfo(
 
   // vertical
   for (var i = 0; i < 15; i += 1) {
-    final mod = !test && ((bits >> i) & 1) == 1;
-
-    modules[switch (i) { < 6 => i, < 8 => i + 1, _ => modules.length - 15 + i }]
-        [8] = mod;
+    modules[switch (i) {
+      < 6 => i + 0,
+      < 8 => i + 1,
+      _ => modules.length - 15 + i
+    }][8] = !test && ((bits >> i) & 1) == 1;
   }
 
   // horizontal
   for (var i = 0; i < 15; i += 1) {
-    final mod = !test && ((bits >> i) & 1) == 1;
-
     modules[8][switch (i) {
       < 8 => modules.length - i - 1,
       < 9 => 15 - i - 1 + 1,
       _ => 15 - i - 1
-    }] = mod;
+    }] = !test && ((bits >> i) & 1) == 1;
   }
 
   // fixed module
@@ -284,14 +283,14 @@ void _mapData(
   }
 }
 
-double _getLostPoint(List<List<bool>> matrix) {
-  final size = matrix.length;
+double _getLostPoint(List<List<bool>> modules) {
+  final size = modules.length;
   var lostPoint = .0;
 
   // LEVEL1
   for (var row = 0; row < size; row += 1) {
     for (var col = 0; col < size; col += 1) {
-      final dark = matrix[row][col];
+      final dark = modules[row][col];
       var sameCount = 0;
 
       for (var r = -1; r <= 1; r += 1) {
@@ -301,7 +300,7 @@ double _getLostPoint(List<List<bool>> matrix) {
           if (col + c < 0 || size <= col + c) continue;
           if (r == 0 && c == 0) continue;
 
-          if (dark == matrix[row + r][col + c]) sameCount += 1;
+          if (dark == modules[row + r][col + c]) sameCount += 1;
         }
       }
 
@@ -313,10 +312,10 @@ double _getLostPoint(List<List<bool>> matrix) {
   for (var row = 0; row < size - 1; row += 1) {
     for (var col = 0; col < size - 1; col += 1) {
       var count = 0;
-      if (matrix[row][col]) count += 1;
-      if (matrix[row + 1][col]) count += 1;
-      if (matrix[row][col + 1]) count += 1;
-      if (matrix[row + 1][col + 1]) count += 1;
+      if (modules[row][col]) count += 1;
+      if (modules[row + 1][col]) count += 1;
+      if (modules[row][col + 1]) count += 1;
+      if (modules[row + 1][col + 1]) count += 1;
       if (count == 0 || count == 4) lostPoint += 3;
     }
   }
@@ -324,13 +323,13 @@ double _getLostPoint(List<List<bool>> matrix) {
   // LEVEL3
   for (var row = 0; row < size; row += 1) {
     for (var col = 0; col < size - 6; col += 1) {
-      if (matrix[row][col] &&
-          !matrix[row][col + 1] &&
-          matrix[row][col + 2] &&
-          matrix[row][col + 3] &&
-          matrix[row][col + 4] &&
-          !matrix[row][col + 5] &&
-          matrix[row][col + 6]) {
+      if (modules[row][col] &&
+          !modules[row][col + 1] &&
+          modules[row][col + 2] &&
+          modules[row][col + 3] &&
+          modules[row][col + 4] &&
+          !modules[row][col + 5] &&
+          modules[row][col + 6]) {
         lostPoint += 40;
       }
     }
@@ -338,13 +337,13 @@ double _getLostPoint(List<List<bool>> matrix) {
 
   for (var col = 0; col < size; col += 1) {
     for (var row = 0; row < size - 6; row += 1) {
-      if (matrix[row][col] &&
-          !matrix[row + 1][col] &&
-          matrix[row + 2][col] &&
-          matrix[row + 3][col] &&
-          matrix[row + 4][col] &&
-          !matrix[row + 5][col] &&
-          matrix[row + 6][col]) {
+      if (modules[row][col] &&
+          !modules[row + 1][col] &&
+          modules[row + 2][col] &&
+          modules[row + 3][col] &&
+          modules[row + 4][col] &&
+          !modules[row + 5][col] &&
+          modules[row + 6][col]) {
         lostPoint += 40;
       }
     }
@@ -355,7 +354,7 @@ double _getLostPoint(List<List<bool>> matrix) {
 
   for (var col = 0; col < size; col += 1) {
     for (var row = 0; row < size; row += 1) {
-      if (matrix[row][col]) darkCount += 1;
+      if (modules[row][col]) darkCount += 1;
     }
   }
 
