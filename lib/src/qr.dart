@@ -358,7 +358,7 @@ double _getLostPoint(List<List<bool>> modules) {
     }
   }
 
-  final ratio = ((100 * darkCount) / size / size - 50).abs() / 5;
+  final ratio = ((100.0 * darkCount) / size / size - 50).abs() / 5;
   lostPoint += ratio * 10;
 
   return lostPoint;
